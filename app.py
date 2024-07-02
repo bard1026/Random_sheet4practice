@@ -26,7 +26,7 @@ def draw_sheet_music(sheet_music):
     img_height = 200 + len(sheet_music)*50 # (4各一列 列高200)
     img = Image.new('RGB', (img_width, img_height), color='white')
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("C:\\Users\\bard1\\OneDrive\\文件\\Python_Scripts\\project_randomnotes\\Bravura.otf", 40)  # Update with the path to your font
+    font = ImageFont.truetype("Bravura.otf", 40)  # Update with the path to your font
     
     y = 20
     j = 0
