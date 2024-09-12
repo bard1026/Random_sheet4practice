@@ -52,3 +52,24 @@ def draw_sheet_music(sheet_music):
     
 def save_as_pdf(image, path):
     image.save(path, "PDF", resolution=300.0)
+
+# Streamlit app code
+st.title("Random Sheet Music Generator")
+
+num_measures = st.slider("Select number of measures:", min_value=1, max_value=40, value=8)
+sheet_music = create_sheet_music(num_measures)
+sheet_music_img = draw_sheet_music(sheet_music)
+
+pdf_path = "sheet_music.pdf"
+save_as_pdf(sheet_music_img, pdf_path)
+
+st.image(sheet_music_img, caption="Generated Sheet Music")
+
+# Download link for PDF
+with open(pdf_path, "rb") as file:
+    btn = st.download_button(
+        label="Download PDF",
+        data=file,
+        file_name="sheet_music.pdf",
+        mime="application/pdf"
+    )
