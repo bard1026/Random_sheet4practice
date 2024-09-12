@@ -36,6 +36,7 @@ def draw_sheet_music(sheet_music):
     
     y = 50
     x = 15
+    J = 0
     for measure in sheet_music:
         for beat in measure:
             draw.text((x, y), beat, font=font, fill='black')
@@ -43,8 +44,10 @@ def draw_sheet_music(sheet_music):
         # Draw measure line
         x += 10
         draw.line([(x, y + 40), (x, y + 90)], fill='black', width=2)
+        J += 1
         x += 10
-        if x > img_width:  # Check if it exceeds width
+        if J == 3:  # Check if it exceeds width
+            J = 0
             x = 15
             y += 100  # Adjust line height as needed
         if y > img_height:  # Check if it exceeds height
