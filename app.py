@@ -32,7 +32,7 @@ def draw_sheet_music(sheet_music):
 
     img = Image.new('RGB', (img_width, img_height), color='white')
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("Bravura.otf", 40)  # Update with the path to your font
+    font = ImageFont.truetype("Bravura.otf", 32)  # Update with the path to your font
     
     y = 50
     x = 15
@@ -43,13 +43,13 @@ def draw_sheet_music(sheet_music):
             x += 40  # Adjust spacing as needed
         # Draw measure line
         x += 10
-        draw.line([(x, y + 40), (x, y + 90)], fill='black', width=2)
+        draw.line([(x, y + 40), (x, y + 80)], fill='black', width=2)
         J += 1
         x += 10
         if J == 4:  # Check if it exceeds width
             J = 0
             x = 15
-            y += 100  # Adjust line height as needed
+            y += 80  # Adjust line height as needed
         if y > img_height:  # Check if it exceeds height
             break
 
