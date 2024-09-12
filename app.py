@@ -5,8 +5,9 @@ import random
 # Function to create a random beat
 def create_beat():
     beats = [
-        "𝅘𝅥 ",               # 四分音符
+        " 𝅘𝅥 ",               # 四分音符
         "𝄾  𝅘𝅥𝅮",             # 八分休止符 + 八分音符
+        "𝅘𝅥𝅮  𝄾",
         "♫"              # 八分音符 + 八分音符
     ]
     return random.choice(beats)
@@ -38,14 +39,14 @@ def draw_sheet_music(sheet_music):
     for measure in sheet_music:
         for beat in measure:
             draw.text((x, y), beat, font=font, fill='black')
-            x += 100  # Adjust spacing as needed
+            x += 30  # Adjust spacing as needed
         # Draw measure line
         draw.line([(x, y + 40), (x, y + 90)], fill='black', width=2)
-        x += 50
-        if x > img_width - 200:  # Check if it exceeds width
+        x += 120
+        if x > img_width:  # Check if it exceeds width
             x = 50
             y += 100  # Adjust line height as needed
-        if y > img_height - 100:  # Check if it exceeds height
+        if y > img_height:  # Check if it exceeds height
             break
 
     return img
