@@ -5,7 +5,7 @@ import random
 # Function to create a random beat
 def create_beat():
     beats = [
-        " 𝅘𝅥 ",               # 四分音符
+        "𝅘𝅥",               # 四分音符
         "𝄾  𝅘𝅥𝅮",             # 八分休止符 + 八分音符
         "𝅘𝅥𝅮  𝄾",
         "♫"              # 八分音符 + 八分音符
@@ -40,7 +40,7 @@ def draw_sheet_music(sheet_music):
     for measure in sheet_music:
         for beat in measure:
             draw.text((x, y), beat, font=font, fill='black')
-            x += 30  # Adjust spacing as needed
+            x += 40  # Adjust spacing as needed
         # Draw measure line
         x += 10
         draw.line([(x, y + 40), (x, y + 90)], fill='black', width=2)
