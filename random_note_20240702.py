@@ -23,45 +23,33 @@ def create_sheet_music(num_measures):
 
 # Function to draw sheet music
 def draw_sheet_music(sheet_music):
-    img_width = 1000
-    img_height = 200 + len(sheet_music)*50 # (4各一列 列高200)
+    # A4 size in points (1 point = 1/72 inch)
+    img_width = 210 * 72 / 25.4  # A4 width in points
+    img_height = 297 * 72 / 25.4  # A4 height in points
+    
+    img_width = int(img_width)
+    img_height = int(img_height)
+
     img = Image.new('RGB', (img_width, img_height), color='white')
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("C:\\Users\\bard1\\OneDrive\\文件\\Python_Scripts\\project_randomnotes\\Bravura.otf", 40)  # Update with the path to your font
+    font = ImageFont.truetype("C:\\Users\\bard1\\OneDrive\\文件\\Python_Scripts\\project_randomnotes\\Bravura.otf", 40)
     
-    y = 20
-    j = 0
-    x = 20
+    y = 50
+    x = 50
     for measure in sheet_music:
         for beat in measure:
             draw.text((x, y), beat, font=font, fill='black')
-            x += 50
+            x += 100  # Adjust spacing as needed
         # Draw measure line
         draw.line([(x, y + 40), (x, y + 90)], fill='black', width=2)
-        x += 25
-        j = j + 1
-        if j % 4 == 0:
-            x = 20
-            y = y + 200
+        x += 50
+        if x > img_width - 200:  # Check if it exceeds width
+            x = 50
+            y += 100  # Adjust line height as needed
+        if y > img_height - 100:  # Check if it exceeds height
+            break
 
     return img
-
-st.title("Random Sheet Music Generator")
-
-num_measures = st.slider("Select number of measures:", min_value=1, max_value=40, value=8)
-sheet_music = create_sheet_music(num_measures)
-sheet_music_img = draw_sheet_music(sheet_music)
-
-sheet_music_img_path = "sheet_music.png"
-sheet_music_img.save(sheet_music_img_path)
-
-st.image(sheet_music_img, caption="Generated Sheet Music")
-
-# Download link
-with open(sheet_music_img_path, "rb") as file:
-    btn = st.download_button(
-        label="Download Image",
-        data=file,
-        file_name="sheet_music.png",
-        mime="image/png"
-    )
+    
+def save_as_pdf(image, path):
+    image.save(path, "PDF", resolution=300.0)
