@@ -40,7 +40,7 @@ def draw_sheet_music(sheet_music):
     for measure in sheet_music:
         for beat in measure:
             draw.text((x, y), beat, font=font, fill='black')
-            x += 35  # Adjust spacing as needed
+            x += 32  # Adjust spacing as needed
         # Draw measure line
         x += 10
         draw.line([(x, y + 40), (x, y + 80)], fill='black', width=2)
