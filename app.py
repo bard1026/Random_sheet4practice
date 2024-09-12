@@ -46,7 +46,7 @@ def draw_sheet_music(sheet_music):
         draw.line([(x, y + 40), (x, y + 90)], fill='black', width=2)
         J += 1
         x += 10
-        if J == 3:  # Check if it exceeds width
+        if J == 4:  # Check if it exceeds width
             J = 0
             x = 15
             y += 100  # Adjust line height as needed
