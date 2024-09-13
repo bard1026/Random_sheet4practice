@@ -54,7 +54,7 @@ def draw_sheet_music(sheet_music):
         if J == 4:  # Check if it exceeds width
             J = 0
             x = 10
-            y += 80  # Adjust line height as needed
+            y += 120  # Adjust line height as needed
             # 換行再 Draw 打擊譜號 line
             draw.line([(x, y + 50), (x, y + 90)], fill='black', width=6)
             x += 10
@@ -71,7 +71,7 @@ def save_as_pdf(image, path):
 # Streamlit app code
 st.title("Random Sheet Music Generator")
 
-num_measures = st.slider("Select number of measures:", min_value=1, max_value=40, value=8)
+num_measures = st.slider("Select number of measures:", min_value=1, max_value=56, value=8)
 sheet_music = create_sheet_music(num_measures)
 sheet_music_img = draw_sheet_music(sheet_music)
 
