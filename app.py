@@ -48,7 +48,7 @@ def draw_sheet_music(sheet_music):
             x += 45  # Adjust spacing as needed
         # Draw measure line
         x += 10
-        draw.line([(x, y + 40), (x, y + 80)], fill='black', width=2)
+        draw.line([(x, y + 50), (x, y + 90)], fill='black', width=2)
         J += 1
         x += 10
         if J == 4:  # Check if it exceeds width
@@ -56,9 +56,9 @@ def draw_sheet_music(sheet_music):
             x = 10
             y += 80  # Adjust line height as needed
             # 換行再 Draw 打擊譜號 line
-            draw.line([(x, y + 40), (x, y + 80)], fill='black', width=6)
+            draw.line([(x, y + 50), (x, y + 90)], fill='black', width=6)
             x += 10
-            draw.line([(x, y + 40), (x, y + 80)], fill='black', width=6)
+            draw.line([(x, y + 50), (x, y + 90)], fill='black', width=6)
             x += 10
         if y > img_height:  # Check if it exceeds height
             break
