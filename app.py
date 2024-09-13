@@ -38,9 +38,9 @@ def draw_sheet_music(sheet_music):
     x = 40
     J = 0
     # Draw 打擊譜號 line
-    draw.line([(x, y + 50), (x, y + 86)], fill='black', width=6)
+    draw.line([(x, y + 45), (x, y + 81)], fill='black', width=6)
     x += 10
-    draw.line([(x, y + 50), (x, y + 86)], fill='black', width=6)
+    draw.line([(x, y + 45), (x, y + 81)], fill='black', width=6)
     x += 10
     for measure in sheet_music:
         for beat in measure:
