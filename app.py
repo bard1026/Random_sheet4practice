@@ -23,24 +23,29 @@ def create_sheet_music(num_measures):
 
 # Function to draw sheet music
 def draw_sheet_music(sheet_music):
-    # A4 size in points (1 point = 1/72 inch)
-    img_width = 210 * 72 / 25.4  # A4 width in points
-    img_height = 297 * 72 / 25.4  # A4 height in points
+    # A4 size in points (100 PPI)
+    img_width = 210 * 100 / 25.4  # A4 width in points
+    img_height = 297 * 100 / 25.4  # A4 height in points
     
-    img_width = int(img_width)
-    img_height = int(img_height)
+    img_width = int(img_width) # 826 in 100 PPI
+    img_height = int(img_height) #1169 in 100 PPI
 
     img = Image.new('RGB', (img_width, img_height), color='white')
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("Bravura.otf", 32)  # Update with the path to your font
+    font = ImageFont.truetype("Bravura.otf", 40)  # Update with the path to your font
     
     y = 50
     x = 10
     J = 0
+    # Draw 打擊譜號 line
+    draw.line([(x, y + 40), (x, y + 80)], fill='black', width=4)
+    x += 5
+    draw.line([(x, y + 40), (x, y + 80)], fill='black', width=4)
+    x += 10
     for measure in sheet_music:
         for beat in measure:
             draw.text((x, y), beat, font=font, fill='black')
-            x += 32  # Adjust spacing as needed
+            x += 40  # Adjust spacing as needed
         # Draw measure line
         x += 10
         draw.line([(x, y + 40), (x, y + 80)], fill='black', width=2)
@@ -50,13 +55,18 @@ def draw_sheet_music(sheet_music):
             J = 0
             x = 10
             y += 80  # Adjust line height as needed
+            # 換行再 Draw 打擊譜號 line
+            draw.line([(x, y + 40), (x, y + 80)], fill='black', width=4)
+            x += 5
+            draw.line([(x, y + 40), (x, y + 80)], fill='black', width=4)
+            x += 10
         if y > img_height:  # Check if it exceeds height
             break
 
     return img
     
 def save_as_pdf(image, path):
-    image.save(path, "PDF", resolution=300.0)
+    image.save(path, "PDF", resolution=100.0)
 
 # Streamlit app code
 st.title("Random Sheet Music Generator")
