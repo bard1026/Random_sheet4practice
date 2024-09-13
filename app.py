@@ -34,7 +34,7 @@ def draw_sheet_music(sheet_music):
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("Bravura.otf", 40)  # Update with the path to your font
     
-    y = 60
+    y = 70
     x = 20
     J = 0
     # Draw 打擊譜號 line
@@ -45,7 +45,7 @@ def draw_sheet_music(sheet_music):
     for measure in sheet_music:
         for beat in measure:
             draw.text((x, y), beat, font=font, fill='black')
-            x += 45  # Adjust spacing as needed
+            x += 44  # Adjust spacing as needed
         # Draw measure line
         x += 10
         draw.line([(x, y + 40), (x, y + 80)], fill='black', width=2)
