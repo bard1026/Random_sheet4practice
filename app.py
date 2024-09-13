@@ -53,7 +53,7 @@ def draw_sheet_music(sheet_music):
         x += 10
         if J == 4:  # Check if it exceeds width
             J = 0
-            x = 10
+            x = 20
             y += 80  # Adjust line height as needed
             # 換行再 Draw 打擊譜號 line
             draw.line([(x, y + 40), (x, y + 80)], fill='black', width=6)
