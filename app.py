@@ -106,7 +106,12 @@ if st.button("產生樂譜"):
     sheet_img = generate_sheet_music(difficulty, num_measures)
     sheet_img_path = "sheet_music.png"
     sheet_img.save(sheet_img_path)
-    st.image(sheet_img, caption="產生的樂譜", width=800)
+    # 預覽用縮圖（等比例）
+    preview_width = 800
+    w_percent = (preview_width / float(sheet_img.size[0]))
+    h_size = int((float(sheet_img.size[1]) * float(w_percent)))
+    preview_img = sheet_img.resize((preview_width, h_size), Image.ANTIALIAS)
+    st.image(preview_img, caption="產生的樂譜", width=800)
 
     with open(sheet_img_path, "rb") as file:
         st.download_button(
