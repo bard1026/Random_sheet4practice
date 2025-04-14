@@ -62,21 +62,23 @@ def generate_sheet_music(difficulty, num_measures):
 
         total_image_width = sum(img.width for img in flat_images)
         spacing = 0
-        if len(this_line_measures) == measures_per_line:
+        full_line = len(this_line_measures) == measures_per_line
+        if full_line:
             spacing = (usable_width - total_image_width) // (notes_per_line - 1)
 
         x = left_margin
         count = 0
+        sep_count = 0
         for img in flat_images:
             current_line.paste(img, (x, y))
             x += img.width
-            if count < notes_per_line - 1:
+            if count < len(flat_images) - 1:
                 x += spacing
             count += 1
-
-            # 在第4、8張圖片後畫分隔線（每小節結束）
-            if count in [4, 8] and len(this_line_measures) == measures_per_line:
-                draw.line([(x - spacing // 2, y), (x - spacing // 2, y + max_height)], fill='black', width=3)
+            # 畫小節線（每 4 張圖片後）
+            if count % notes_per_measure == 0:
+                sep_x = x - spacing // 2 if full_line else x
+                draw.line([(sep_x, y), (sep_x, y + max_height)], fill='black', width=3)
 
         img_lines.append(current_line)
 
@@ -86,7 +88,8 @@ def generate_sheet_music(difficulty, num_measures):
     for i, line_img in enumerate(img_lines):
         sheet_img.paste(line_img, (0, i * line_height))
 
-    return sheet_img# 匯出成 A4 PDF
+    return sheet_img
+
 def export_to_pdf(image, filename="sheet_music.pdf"):
     pdf = FPDF(unit="pt", format="A4")
     pdf.add_page()
