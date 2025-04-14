@@ -110,7 +110,7 @@ if st.button("產生樂譜"):
     preview_width = 800
     w_percent = (preview_width / float(sheet_img.size[0]))
     h_size = int((float(sheet_img.size[1]) * float(w_percent)))
-    preview_img = sheet_img.resize((preview_width, h_size), Image.Resampling.LANCZOS)
+    preview_img = sheet_img.resize((preview_width, h_size), resample=Image.LANCZOS)
     st.image(preview_img, caption="產生的樂譜", width=800)
 
     with open(sheet_img_path, "rb") as file:
