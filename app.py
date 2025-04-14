@@ -37,39 +37,45 @@ def generate_sheet_music(difficulty, num_measures):
             measure.append(img)
         measure_images.append(measure)
 
-    # 圖片組合參數
-    sheet_width = 2680
-    y_margin = 30
-    x_margin = 20
-    x_spacing = 20
-    y_spacing = 30
+    # 配置參數
+    measures_per_line = 3
+    notes_per_measure = 4
+    notes_per_line = measures_per_line * notes_per_measure  # 12
+    sheet_width = 2600
+    left_margin = 100
+    right_margin = 2500
+    usable_width = right_margin - left_margin  # 2400
+    spacing_slots = notes_per_line - 1 + (measures_per_line - 1)  # 11 + 2 = 13
+    spacing = usable_width // spacing_slots
     max_height = 265
-    line_height = max_height + y_spacing
-    img_lines = []
+    line_height = max_height + 55  # 留一點空隙
 
+    # 圖片行初始化
+    img_lines = []
     current_line = Image.new('RGB', (sheet_width, line_height), 'white')
     draw = ImageDraw.Draw(current_line)
-    x = x_margin
-    y = y_margin
-
+    x = left_margin
+    y = 30
     count = 0
-    for measure in measure_images:
-        for img in measure:
-            current_line.paste(img, (x, y))
-            x += img.width + x_spacing
-        # 畫分隔線
-        draw.line([(x, y), (x, y + max_height)], fill='black', width=3)
-        x += x_spacing
-        count += 1
-        if count % 3 == 0:
-            img_lines.append(current_line)
-            if count != len(measure_images):
-                current_line = Image.new('RGB', (sheet_width, line_height), 'white')
-                draw = ImageDraw.Draw(current_line)
-                x = x_margin
 
-    # 若不是 4 的倍數，補最後一行
-    if count % 4 != 0:
+    for measure in measure_images:
+        for idx, img in enumerate(measure):
+            current_line.paste(img, (x, y))
+            x += img.width + spacing
+            count += 1
+            # 插入分隔線（在每小節之後，但不要在最後一個小節）
+            if count % 4 == 0 and (count // 4) % 3 != 0:
+                draw.line([(x - spacing // 2, y), (x - spacing // 2, y + max_height)], fill='black', width=3)
+
+        # 換行邏輯：每 3 小節（12 張圖）換行
+        if count % (notes_per_measure * measures_per_line) == 0:
+            img_lines.append(current_line)
+            current_line = Image.new('RGB', (sheet_width, line_height), 'white')
+            draw = ImageDraw.Draw(current_line)
+            x = left_margin
+
+    # 收尾行
+    if count % notes_per_line != 0:
         img_lines.append(current_line)
 
     # 組合所有行成一張長圖
