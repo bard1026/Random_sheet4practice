@@ -51,39 +51,33 @@ def generate_sheet_music(difficulty, num_measures):
     line_height = max_height + 55  # 留白空間
 
     img_lines = []
-    current_line = Image.new('RGB', (sheet_width, line_height), 'white')
-    draw = ImageDraw.Draw(current_line)
     y = 30
-    note_index = 0
 
-    note_positions = []
-    step = usable_width / (notes_per_line - 1)
-    for i in range(notes_per_line):
-        x_pos = int(left_margin + i * step)
-        note_positions.append(x_pos)
+    for line_start in range(0, len(measure_images), measures_per_line):
+        current_line = Image.new('RGB', (sheet_width, line_height), 'white')
+        draw = ImageDraw.Draw(current_line)
 
-    for idx, measure in enumerate(measure_images):
-        for img in measure:
-            x = note_positions[note_index % notes_per_line]
+        this_line_measures = measure_images[line_start:line_start+measures_per_line]
+        flat_images = [img for measure in this_line_measures for img in measure]
+
+        total_image_width = sum(img.width for img in flat_images)
+        spacing = 0
+        if len(this_line_measures) == measures_per_line:
+            spacing = (usable_width - total_image_width) // (notes_per_line - 1)
+
+        x = left_margin
+        count = 0
+        for img in flat_images:
             current_line.paste(img, (x, y))
-            note_index += 1
+            x += img.width
+            if count < notes_per_line - 1:
+                x += spacing
+            count += 1
 
-        # 每三小節（12 張圖）換行
-        if note_index % notes_per_line == 0:
-            # 畫分隔線（在第 4 張、第 8 張之間）
-            for i in [4, 8]:
-                x_sep = (note_positions[i - 1] + note_positions[i]) // 2
-                draw.line([(x_sep, y), (x_sep, y + max_height)], fill='black', width=3)
-            img_lines.append(current_line)
-            current_line = Image.new('RGB', (sheet_width, line_height), 'white')
-            draw = ImageDraw.Draw(current_line)
+            # 在第4、8張圖片後畫分隔線（每小節結束）
+            if count in [4, 8] and len(this_line_measures) == measures_per_line:
+                draw.line([(x - spacing // 2, y), (x - spacing // 2, y + max_height)], fill='black', width=3)
 
-    # 收尾
-    if note_index % notes_per_line != 0:
-        for i in [4, 8]:
-            if i < note_index % notes_per_line:
-                x_sep = (note_positions[i - 1] + note_positions[i]) // 2
-                draw.line([(x_sep, y), (x_sep, y + max_height)], fill='black', width=3)
         img_lines.append(current_line)
 
     # 合併所有行
@@ -92,8 +86,7 @@ def generate_sheet_music(difficulty, num_measures):
     for i, line_img in enumerate(img_lines):
         sheet_img.paste(line_img, (0, i * line_height))
 
-    return sheet_img
-# 匯出成 A4 PDF
+    return sheet_img# 匯出成 A4 PDF
 def export_to_pdf(image, filename="sheet_music.pdf"):
     pdf = FPDF(unit="pt", format="A4")
     pdf.add_page()
