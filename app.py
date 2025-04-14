@@ -6,7 +6,7 @@ Created on Sun Apr 13 23:34:49 2025
 """
 
 import streamlit as st
-from PIL import Image, ImageDraw, ImageFont, ImageResampling
+from PIL import Image, ImageDraw, ImageFont
 import random
 import os
 from fpdf import FPDF
