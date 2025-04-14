@@ -45,7 +45,7 @@ def generate_sheet_music(difficulty, num_measures):
     left_margin = 100
     right_margin = 2500
     usable_width = right_margin - left_margin  # 2400
-    spacing_slots = notes_per_line - 1 + (measures_per_line - 1)  # 11 + 2 = 13
+    spacing_slots = notes_per_line + (measures_per_line - 2)  # 11 + 2 = 13
     spacing = usable_width // spacing_slots
     max_height = 265
     line_height = max_height + 55  # 留一點空隙
