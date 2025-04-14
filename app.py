@@ -6,7 +6,7 @@ Created on Sun Apr 13 23:34:49 2025
 """
 
 import streamlit as st
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont, ImageResampling
 import random
 import os
 from fpdf import FPDF
@@ -110,7 +110,7 @@ if st.button("產生樂譜"):
     preview_width = 800
     w_percent = (preview_width / float(sheet_img.size[0]))
     h_size = int((float(sheet_img.size[1]) * float(w_percent)))
-    preview_img = sheet_img.resize((preview_width, h_size), Image.ANTIALIAS)
+    preview_img = sheet_img.resize((preview_width, h_size), Image.Resampling.LANCZOS)
     st.image(preview_img, caption="產生的樂譜", width=800)
 
     with open(sheet_img_path, "rb") as file:
