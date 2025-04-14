@@ -12,7 +12,7 @@ import os
 from fpdf import FPDF
 
 # 圖片資料夾路徑
-IMAGE_FOLDER = "\\pics\\"  # 圖片需命名為 0.png ~ 15.png
+IMAGE_FOLDER = "pics"  # 圖片需命名為 0.png ~ 15.png
 
 # 難度對應圖庫索引
 DIFFICULTY_MAP = {
