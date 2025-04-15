@@ -117,7 +117,7 @@ def generate_score(difficulty, num_measures):
                 else:
                     st.error(f"音符圖片 {note_path} 不存在！")
                     return None
-            # 繪製小節線（單線，除非是最後一小節）
+            # 繪製小節線（單線或雙線）
             is_last_measure = (row == num_rows - 1) and (measure_idx == measures_in_row - 1) and (row * measures_per_row + measure_idx + 1 == num_measures)
             if is_last_measure:
                 # 繪製雙線（樂譜結束）
@@ -130,18 +130,16 @@ def generate_score(difficulty, num_measures):
                 draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=single_barline_width)
                 x_offset += single_barline_width
         
-        # 繪製右邊界線（單線，除非是最後一小節）
+        # 繪製右邊界線（僅對非最後小節，且使用單線）
         if row < num_rows - 1 or measures_in_row == measures_per_row:
             # 非最後一行或最後一行滿小節數，右邊界線對齊
             right_x = margin + measures_per_row * measure_width + single_barline_width
-        else:
-            # 最後一行未滿小節數，右邊界線跟隨最後小節
-            right_x = margin + measures_in_row * measure_width + single_barline_width
-        if row == num_rows - 1 and measures_in_row == num_measures - row * measures_per_row:
-            # 最後一小節已在迴圈中畫雙線，這裡不再畫右邊界線
-            pass
-        else:
             draw.line([(right_x, y_offset), (right_x, y_offset + note_height)], fill="black", width=single_barline_width)
+        elif not is_last_measure:
+            # 最後一行未滿小節數，且非最後小節，右邊界線跟隨最後小節，使用單線
+            right_x = margin + measures_in_row * measure_width + single_barline_width
+            draw.line([(right_x, y_offset), (right_x, y_offset + note_height)], fill="black", width=single_barline_width)
+        # 如果是最後一小節，右邊界線已在雙線中處理，無需額外繪製
     
     return score_image
 
