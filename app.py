@@ -48,20 +48,24 @@ NOTE_WIDTH_RANGE = (180, 250)
 MEASURE_BEATS = 4
 BARLINE_WIDTH = 5
 MARGIN = 50
+ROW_SPACING = 50
 
 def generate_score(difficulty, num_measures):
     # 根據難度選擇音符
     note_choices = DIFFICULTY_NOTES[difficulty]
     measures_per_row = MEASURES_PER_ROW[difficulty]
     
-    # 計算每小節寬度（隨機音符寬度）
-    measure_width = sum(random.randint(*NOTE_WIDTH_RANGE) for _ in range(MEASURE_BEATS)) + BARLINE_WIDTH
-    row_width = measure_width * measures_per_row + BARLINE_WIDTH
+    # 計算每小節寬度（固定音符寬度以確保對齊）
+    note_width = (NOTE_WIDTH_RANGE[0] + NOTE_WIDTH_RANGE[1]) // 2  # 使用平均寬度
+    measure_width = note_width * MEASURE_BEATS + BARLINE_WIDTH
+    row_width = measure_width * measures_per_row + BARLINE_WIDTH * 2  # 左右各一條界線
+    
+    # 計算行數
     num_rows = math.ceil(num_measures / measures_per_row)
     
     # 計算總圖片尺寸
-    total_width = max(row_width, measure_width * min(num_measures, measures_per_row)) + 2 * MARGIN
-    total_height = (NOTE_HEIGHT + 50) * num_rows + 2 * MARGIN
+    total_width = row_width + 2 * MARGIN
+    total_height = (NOTE_HEIGHT + ROW_SPACING) * num_rows + 2 * MARGIN
     
     # 確保圖片不超過平板尺寸
     scale = min(TABLET_WIDTH / total_width, TABLET_HEIGHT / total_height)
@@ -69,11 +73,16 @@ def generate_score(difficulty, num_measures):
         total_width = int(total_width * scale)
         total_height = int(total_height * scale)
         measure_width = int(measure_width * scale)
-        note_width_range = (int(NOTE_WIDTH_RANGE[0] * scale), int(NOTE_WIDTH_RANGE[1] * scale))
+        note_width = int(note_width * scale)
         note_height = int(NOTE_HEIGHT * scale)
+        barline_width = int(BARLINE_WIDTH * scale)
+        margin = int(MARGIN * scale)
+        row_spacing = int(ROW_SPACING * scale)
     else:
-        note_width_range = NOTE_WIDTH_RANGE
         note_height = NOTE_HEIGHT
+        barline_width = BARLINE_WIDTH
+        margin = MARGIN
+        row_spacing = ROW_SPACING
     
     # 創建空白樂譜圖片
     score_image = Image.new("RGB", (int(total_width), int(total_height)), "white")
@@ -82,12 +91,12 @@ def generate_score(difficulty, num_measures):
     # 繪製樂譜
     for row in range(num_rows):
         measures_in_row = min(measures_per_row, num_measures - row * measures_per_row)
-        x_offset = MARGIN
-        y_offset = MARGIN + row * (note_height + 50)
+        x_offset = margin
+        y_offset = margin + row * (note_height + row_spacing)
         
-        # 繪製左邊界線
-        draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=BARLINE_WIDTH)
-        x_offset += BARLINE_WIDTH
+        # 繪製左邊界線（對齊）
+        draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=barline_width)
+        x_offset += barline_width
         
         for measure_idx in range(measures_in_row):
             for beat in range(MEASURE_BEATS):
@@ -96,7 +105,6 @@ def generate_score(difficulty, num_measures):
                 note_path = os.path.join(PICS_DIR, f"{note_idx}.png")
                 if os.path.exists(note_path):
                     note_img = Image.open(note_path)
-                    note_width = random.randint(*note_width_range)
                     note_img = note_img.resize((note_width, note_height), Image.LANCZOS)
                     score_image.paste(note_img, (int(x_offset), int(y_offset)))
                     x_offset += note_width
@@ -104,12 +112,17 @@ def generate_score(difficulty, num_measures):
                     st.error(f"音符圖片 {note_path} 不存在！")
                     return None
             # 繪製小節線
-            draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=BARLINE_WIDTH)
-            x_offset += BARLINE_WIDTH
+            draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=barline_width)
+            x_offset += barline_width
         
-        # 繪製右邊界線（如果行未滿）
-        if measures_in_row < measures_per_row:
-            draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=BARLINE_WIDTH)
+        # 繪製右邊界線
+        if row < num_rows - 1 or measures_in_row == measures_per_row:
+            # 非最後一行或最後一行滿小節數，右邊界線對齊
+            right_x = margin + measures_per_row * measure_width + barline_width
+        else:
+            # 最後一行未滿小節數，右邊界線跟隨最後小節
+            right_x = margin + measures_in_row * measure_width + barline_width
+        draw.line([(right_x, y_offset), (right_x, y_offset + note_height)], fill="black", width=barline_width)
     
     return score_image
 
