@@ -47,8 +47,8 @@ NOTE_HEIGHT = 265
 NOTE_WIDTH_RANGE = (180, 250)
 MEASURE_BEATS = 4
 SINGLE_BARLINE_WIDTH = 3  # 單線寬度
-DOUBLE_BARLINE_WIDTH = 8  # 雙線寬度（包含兩條線和間距）
-DOUBLE_BARLINE_SPACING = 2  # 雙線間距
+DOUBLE_BARLINE_WIDTH = 10  # 雙線寬度（包含兩條線和加大間距）
+DOUBLE_BARLINE_SPACING = 4  # 雙線間距（加大以更明顯）
 MARGIN = 50
 ROW_SPACING = 50
 
@@ -119,8 +119,10 @@ def generate_score(difficulty, num_measures):
                     st.error(f"音符圖片 {note_path} 不存在！")
                     return None
             
-            # 判斷是否為最後一小節
+            # 判斷是否為整份樂譜的最後一小節
             is_last_measure = (current_measure == num_measures - 1)
+            # 判斷是否為當行最後一小節（換行前或行結束）
+            is_row_end = (measure_idx == measures_in_row - 1) and (row < num_rows - 1 or measures_in_row == measures_per_row)
             
             if is_last_measure:
                 # 繪製雙線（樂譜結束）
@@ -128,8 +130,8 @@ def generate_score(difficulty, num_measures):
                 x_offset += single_barline_width + double_barline_spacing
                 draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=single_barline_width)
                 x_offset += single_barline_width
-            else:
-                # 繪製單線（普通小節線）
+            elif not is_row_end and measure_idx < measures_in_row - 1:
+                # 非行結束且非最後小節，繪製單線（普通小節線）
                 draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=single_barline_width)
                 x_offset += single_barline_width
             
