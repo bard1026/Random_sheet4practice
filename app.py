@@ -27,6 +27,15 @@ DIFFICULTY_MAP = {
 # 產生一張樂譜圖片
 def generate_sheet_music(difficulty, num_measures):
     note_ids = DIFFICULTY_MAP[difficulty]
+    
+    # 限制小節數
+    if difficulty in ["beginner", "beginner+"]:
+        num_measures = min(num_measures, 27)  # 最多27小節
+        measures_per_line = 3
+    else:
+        num_measures = min(num_measures, 18)  # 最多18小節
+        measures_per_line = 2
+    
     measure_images = []
     for _ in range(num_measures):
         measure = []
@@ -37,8 +46,6 @@ def generate_sheet_music(difficulty, num_measures):
             measure.append(img)
         measure_images.append(measure)
 
-    # 每行顯示三小節，共12張圖片
-    measures_per_line = 3
     notes_per_measure = 4
     notes_per_line = measures_per_line * notes_per_measure
 
@@ -68,7 +75,6 @@ def generate_sheet_music(difficulty, num_measures):
 
         x = left_margin
         count = 0
-        sep_count = 0
         for img in flat_images:
             current_line.paste(img, (x, y))
             x += img.width
@@ -93,9 +99,18 @@ def generate_sheet_music(difficulty, num_measures):
 def export_to_pdf(image, filename="sheet_music.pdf"):
     pdf = FPDF(unit="pt", format="A4")
     pdf.add_page()
+    
+    # A4尺寸：595 x 842 pt（1英寸 = 72 pt）
+    margin_top_bottom_right = 0.5 * 72  # 0.5英寸 = 36 pt
+    margin_left = 0.74653 * 72  # 0.74653英寸 ≈ 53.75 pt
+    
+    # 計算可用寬度
+    img_width = 595 - margin_left - margin_top_bottom_right  # 595 - 53.75 - 36 ≈ 505.25 pt
+    img_height = image.size[1] * (img_width / image.size[0])  # 按比例縮放
+    
     temp_path = "temp_sheet.png"
     image.save(temp_path)
-    pdf.image(temp_path, x=20, y=20, w=555)  # A4寬度約595pt，留邊界
+    pdf.image(temp_path, x=margin_left, y=margin_top_bottom_right, w=img_width)
     pdf.output(filename)
     os.remove(temp_path)
 
@@ -103,7 +118,9 @@ def export_to_pdf(image, filename="sheet_music.pdf"):
 st.title("節奏樂譜產生器")
 
 difficulty = st.selectbox("選擇難度：", list(DIFFICULTY_MAP.keys()))
-num_measures = st.slider("選擇小節數：", min_value=1, max_value=40, value=8)
+# 根據難度設置小節數上限
+max_measures = 27 if difficulty in ["beginner", "beginner+"] else 18
+num_measures = st.slider("選擇小節數：", min_value=1, max_value=max_measures, value=8)
 
 if st.button("產生樂譜"):
     sheet_img = generate_sheet_music(difficulty, num_measures)
