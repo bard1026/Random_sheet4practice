@@ -46,7 +46,9 @@ TABLET_HEIGHT = 1920
 NOTE_HEIGHT = 265
 NOTE_WIDTH_RANGE = (180, 250)
 MEASURE_BEATS = 4
-BARLINE_WIDTH = 5
+SINGLE_BARLINE_WIDTH = 3  # 單線寬度
+DOUBLE_BARLINE_WIDTH = 8  # 雙線寬度（包含兩條線和間距）
+DOUBLE_BARLINE_SPACING = 2  # 雙線間距
 MARGIN = 50
 ROW_SPACING = 50
 
@@ -57,8 +59,8 @@ def generate_score(difficulty, num_measures):
     
     # 計算每小節寬度（固定音符寬度以確保對齊）
     note_width = (NOTE_WIDTH_RANGE[0] + NOTE_WIDTH_RANGE[1]) // 2  # 使用平均寬度
-    measure_width = note_width * MEASURE_BEATS + BARLINE_WIDTH
-    row_width = measure_width * measures_per_row + BARLINE_WIDTH * 2  # 左右各一條界線
+    measure_width = note_width * MEASURE_BEATS + SINGLE_BARLINE_WIDTH
+    row_width = measure_width * measures_per_row + SINGLE_BARLINE_WIDTH + DOUBLE_BARLINE_WIDTH  # 左單線 + 右雙線（最寬情況）
     
     # 計算行數
     num_rows = math.ceil(num_measures / measures_per_row)
@@ -75,12 +77,16 @@ def generate_score(difficulty, num_measures):
         measure_width = int(measure_width * scale)
         note_width = int(note_width * scale)
         note_height = int(NOTE_HEIGHT * scale)
-        barline_width = int(BARLINE_WIDTH * scale)
+        single_barline_width = int(SINGLE_BARLINE_WIDTH * scale)
+        double_barline_width = int(DOUBLE_BARLINE_WIDTH * scale)
+        double_barline_spacing = int(DOUBLE_BARLINE_SPACING * scale)
         margin = int(MARGIN * scale)
         row_spacing = int(ROW_SPACING * scale)
     else:
         note_height = NOTE_HEIGHT
-        barline_width = BARLINE_WIDTH
+        single_barline_width = SINGLE_BARLINE_WIDTH
+        double_barline_width = DOUBLE_BARLINE_WIDTH
+        double_barline_spacing = DOUBLE_BARLINE_SPACING
         margin = MARGIN
         row_spacing = ROW_SPACING
     
@@ -94,9 +100,9 @@ def generate_score(difficulty, num_measures):
         x_offset = margin
         y_offset = margin + row * (note_height + row_spacing)
         
-        # 繪製左邊界線（對齊）
-        draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=barline_width)
-        x_offset += barline_width
+        # 繪製左邊界線（單線）
+        draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=single_barline_width)
+        x_offset += single_barline_width
         
         for measure_idx in range(measures_in_row):
             for beat in range(MEASURE_BEATS):
@@ -111,18 +117,31 @@ def generate_score(difficulty, num_measures):
                 else:
                     st.error(f"音符圖片 {note_path} 不存在！")
                     return None
-            # 繪製小節線
-            draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=barline_width)
-            x_offset += barline_width
+            # 繪製小節線（單線，除非是最後一小節）
+            is_last_measure = (row == num_rows - 1) and (measure_idx == measures_in_row - 1) and (row * measures_per_row + measure_idx + 1 == num_measures)
+            if is_last_measure:
+                # 繪製雙線（樂譜結束）
+                draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=single_barline_width)
+                x_offset += single_barline_width + double_barline_spacing
+                draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=single_barline_width)
+                x_offset += single_barline_width
+            else:
+                # 繪製單線
+                draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=single_barline_width)
+                x_offset += single_barline_width
         
-        # 繪製右邊界線
+        # 繪製右邊界線（單線，除非是最後一小節）
         if row < num_rows - 1 or measures_in_row == measures_per_row:
             # 非最後一行或最後一行滿小節數，右邊界線對齊
-            right_x = margin + measures_per_row * measure_width + barline_width
+            right_x = margin + measures_per_row * measure_width + single_barline_width
         else:
             # 最後一行未滿小節數，右邊界線跟隨最後小節
-            right_x = margin + measures_in_row * measure_width + barline_width
-        draw.line([(right_x, y_offset), (right_x, y_offset + note_height)], fill="black", width=barline_width)
+            right_x = margin + measures_in_row * measure_width + single_barline_width
+        if row == num_rows - 1 and measures_in_row == num_measures - row * measures_per_row:
+            # 最後一小節已在迴圈中畫雙線，這裡不再畫右邊界線
+            pass
+        else:
+            draw.line([(right_x, y_offset), (right_x, y_offset + note_height)], fill="black", width=single_barline_width)
     
     return score_image
 
