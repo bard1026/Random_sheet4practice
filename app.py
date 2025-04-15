@@ -97,22 +97,41 @@ def generate_sheet_music(difficulty, num_measures):
     return sheet_img
 
 def export_to_pdf(image, filename="sheet_music.pdf"):
-    pdf = FPDF(unit="pt", format="A4")
-    pdf.add_page()
+    try:
+        pdf = FPDF(unit="pt", format="A4")
+        pdf.add_page()
+        
+        # A4尺寸：595 x 842 pt（1英寸 = 72 pt）
+        margin_top_bottom_right = 0.5 * 72  # 0.5英寸 = 36 pt
+        margin_left = 0.74653 * 72  # 0.74653英寸 ≈ 53.75 pt
+        
+        # 計算可用寬度
+        img_width = 595 - margin_left - margin_top_bottom_right  # 595 - 53.75 - 36 ≈ 505.25 pt
+        img_height = image.size[1] * (img_width / image.size[0])  # 按比例縮放
+        
+        temp_path = "temp_sheet.png"
+        image.save(temp_path)
+        
+        # 檢查臨時檔案是否存在
+        if not os.path.exists(temp_path):
+            st.error("臨時圖片檔案生成失敗！")
+            return False
+        
+        pdf.image(temp_path, x=margin_left, y=margin_top_bottom_right, w=img_width)
+        pdf.output(filename)
+        
+        # 檢查 PDF 檔案是否存在
+        if not os.path.exists(filename):
+            st.error("PDF 檔案生成失敗！")
+            return False
+        
+        # 清理臨時檔案
+        os.remove(temp_path)
+        return True
     
-    # A4尺寸：595 x 842 pt（1英寸 = 72 pt）
-    margin_top_bottom_right = 0.5 * 72  # 0.5英寸 = 36 pt
-    margin_left = 0.74653 * 72  # 0.74653英寸 ≈ 53.75 pt
-    
-    # 計算可用寬度
-    img_width = 595 - margin_left - margin_top_bottom_right  # 595 - 53.75 - 36 ≈ 505.25 pt
-    img_height = image.size[1] * (img_width / image.size[0])  # 按比例縮放
-    
-    temp_path = "temp_sheet.png"
-    image.save(temp_path)
-    pdf.image(temp_path, x=margin_left, y=margin_top_bottom_right, w=img_width)
-    pdf.output(filename)
-    os.remove(temp_path)
+    except Exception as e:
+        st.error(f"匯出 PDF 時發生錯誤：{str(e)}")
+        return False
 
 # Streamlit 介面
 st.title("節奏樂譜產生器")
@@ -142,11 +161,17 @@ if st.button("產生樂譜"):
         )
 
     if st.button("匯出成 A4 PDF"):
-        export_to_pdf(sheet_img)
-        with open("sheet_music.pdf", "rb") as file:
-            st.download_button(
-                label="下載 PDF 樂譜",
-                data=file,
-                file_name="sheet_music.pdf",
-                mime="application/pdf"
-            )
+        success = export_to_pdf(sheet_img)
+        if success:
+            try:
+                with open("sheet_music.pdf", "rb") as file:
+                    st.download_button(
+                        label="下載 PDF 樂譜",
+                        data=file,
+                        file_name="sheet_music.pdf",
+                        mime="application/pdf"
+                    )
+            except FileNotFoundError:
+                st.error("PDF 檔案未找到，無法提供下載！")
+            except Exception as e:
+                st.error(f"下載 PDF 時發生錯誤：{str(e)}")
