@@ -95,6 +95,7 @@ def generate_score(difficulty, num_measures):
     draw = ImageDraw.Draw(score_image)
     
     # 繪製樂譜
+    current_measure = 0  # 追蹤當前小節序號（從 0 開始）
     for row in range(num_rows):
         measures_in_row = min(measures_per_row, num_measures - row * measures_per_row)
         x_offset = margin
@@ -118,8 +119,8 @@ def generate_score(difficulty, num_measures):
                     st.error(f"音符圖片 {note_path} 不存在！")
                     return None
             
-            # 判斷是否為整份樂譜的最後一小節
-            is_last_measure = (row == num_rows - 1) and (measure_idx == measures_in_row - 1) and (row * measures_per_row + measure_idx + 1 == num_measures)
+            # 判斷是否為最後一小節
+            is_last_measure = (current_measure == num_measures - 1)
             
             if is_last_measure:
                 # 繪製雙線（樂譜結束）
@@ -131,17 +132,19 @@ def generate_score(difficulty, num_measures):
                 # 繪製單線（普通小節線）
                 draw.line([(x_offset, y_offset), (x_offset, y_offset + note_height)], fill="black", width=single_barline_width)
                 x_offset += single_barline_width
+            
+            current_measure += 1  # 更新小節序號
         
-        # 繪製右邊界線（僅對非最後小節的行，且一律使用單線）
+        # 繪製右邊界線（僅對非最後小節的行，且使用單線）
         if row < num_rows - 1:
             # 非最後一行，右邊界線對齊到完整行位置，使用單線
             right_x = margin + measures_per_row * measure_width + single_barline_width
             draw.line([(right_x, y_offset), (right_x, y_offset + note_height)], fill="black", width=single_barline_width)
-        elif measures_in_row < measures_per_row and not is_last_measure:
-            # 最後一行未滿小節數，且非整份樂譜的最後小節，右邊界線跟隨小節，使用單線
+        elif measures_in_row < measures_per_row and current_measure - 1 < num_measures - 1:
+            # 最後一行未滿小節數，且當前行的最後小節不是樂譜的最後小節，右邊界線跟隨小節，使用單線
             right_x = margin + measures_in_row * measure_width + single_barline_width
             draw.line([(right_x, y_offset), (right_x, y_offset + note_height)], fill="black", width=single_barline_width)
-        # 注意：如果是最後一行且包含最後一小節，右邊界線已在雙線中處理，無需額外繪製
+        # 注意：如果當前行包含最後一小節，右邊界線已在雙線中處理，無需額外繪製
     
     return score_image
 
