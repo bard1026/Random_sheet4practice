@@ -6,7 +6,7 @@ Created on Sun Apr 13 23:34:49 2025
 """
 
 import streamlit as st
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 import random
 import os
 from fpdf import FPDF
@@ -67,11 +67,20 @@ def generate_sheet_music(difficulty, num_measures):
         this_line_measures = measure_images[line_start:line_start+measures_per_line]
         flat_images = [img for measure in this_line_measures for img in measure]
 
+        # 動態調整圖片大小以避免太寬（針對 intermediate 到 professional）
         total_image_width = sum(img.width for img in flat_images)
+        if difficulty in ["intermediate", "intermediate+", "advanced", "professional"]:
+            scale_factor = min(1.0, usable_width / total_image_width) if total_image_width > usable_width else 1.0
+            flat_images = [
+                img.resize((int(img.width * scale_factor), int(img.height * scale_factor)), resample=Image.LANCZOS)
+                for img in flat_images
+            ]
+            total_image_width = sum(img.width for img in flat_images)
+
         spacing = 0
         full_line = len(this_line_measures) == measures_per_line
         if full_line:
-            spacing = (usable_width - total_image_width) // (notes_per_line - 1)
+            spacing = (usable_width - total_image_width) // (notes_per_line - 1) if notes_per_line > 1 else 0
 
         x = left_margin
         count = 0
@@ -114,7 +123,7 @@ def export_to_pdf(image, filename="sheet_music.pdf"):
         
         # 檢查臨時檔案是否存在
         if not os.path.exists(temp_path):
-            st.error("臨時圖片檔案生成失敗！")
+            st.error(f"臨時圖片檔案 {temp_path} 生成失敗！")
             return False
         
         pdf.image(temp_path, x=margin_left, y=margin_top_bottom_right, w=img_width)
@@ -122,16 +131,22 @@ def export_to_pdf(image, filename="sheet_music.pdf"):
         
         # 檢查 PDF 檔案是否存在
         if not os.path.exists(filename):
-            st.error("PDF 檔案生成失敗！")
+            st.error(f"PDF 檔案 {filename} 生成失敗！")
             return False
         
-        # 清理臨時檔案
-        os.remove(temp_path)
+        st.success(f"PDF 檔案 {filename} 已生成！")
         return True
     
     except Exception as e:
         st.error(f"匯出 PDF 時發生錯誤：{str(e)}")
         return False
+    finally:
+        # 清理臨時檔案（即使發生錯誤）
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception as e:
+                st.warning(f"無法刪除臨時檔案 {temp_path}：{str(e)}")
 
 # Streamlit 介面
 st.title("節奏樂譜產生器")
@@ -160,6 +175,7 @@ if st.button("產生樂譜"):
             mime="image/png"
         )
 
+    # 將 PDF 匯出和下載邏輯合併，確保按鈕點擊後立即處理
     if st.button("匯出成 A4 PDF"):
         success = export_to_pdf(sheet_img)
         if success:
@@ -169,7 +185,8 @@ if st.button("產生樂譜"):
                         label="下載 PDF 樂譜",
                         data=file,
                         file_name="sheet_music.pdf",
-                        mime="application/pdf"
+                        mime="application/pdf",
+                        key="pdf_download"  # 添加唯一鍵避免衝突
                     )
             except FileNotFoundError:
                 st.error("PDF 檔案未找到，無法提供下載！")
